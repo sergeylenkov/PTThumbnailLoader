@@ -1,0 +1,46 @@
+Async image loader.
+
+Using PTThumbnailLoader
+===================================
+
+Add files into your project
+
+Import class
+
+	import "PTThumbnailLoader.h"
+	
+Load image into UITableView
+
+	// load image
+	
+    - (UITableViewCell *)tableView:(UITableView *)aTableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+	    // store downloaded file in cache
+
+		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *cachePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"Thumbnails"];
+		NSString *filePath = [cachePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%d.png", article.identifier]];
+	
+    	// download image
+
+	   	PTThumbnailLoader *loader = [[PTThumbnailLoader alloc] init];
+		loader.url = article.imageURL;
+		loader.indexPath = indexPath;
+		loader.cacheFile = filePath;
+		loader.delegate = self;
+
+		[loader startDownload];
+	}
+	
+	// add downloaded image into cell
+	
+	- (void)thumbnailLoader:(PTThumbnailLoader *)loader didLoad:(NSIndexPath *)indexPath {
+	    UITableViewCell *cell = [itemsView cellForRowAtIndexPath:indexPath];
+	    UIImageView *imageView = (UIImageView *)[cell viewWithTag:1];
+	    imageView.image = loader.image;
+
+	    [loader release];
+	}
+
+	- (void)thumbnailLoader:(PTThumbnailLoader *)loader didFail:(NSError *)error {
+	    [loader release];
+	}
