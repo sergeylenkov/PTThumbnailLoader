@@ -1,5 +1,5 @@
-Async image loader.
--------------------
+Async image loader
+==================
 
 ### Using PTThumbnailLoader
 
