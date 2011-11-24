@@ -26,8 +26,16 @@
 }
 
 - (void)startDownload {
-    imageData = [[NSMutableData data] retain];
-    connection = [[NSURLConnection alloc] initWithRequest:[NSURLRequest requestWithURL:url] delegate:self];
+    if (cacheFile && [[NSFileManager defaultManager] fileExistsAtPath:cacheFile]) {
+        self.image = [UIImage imageWithContentsOfFile:cacheFile];
+        
+        if (delegate) {
+            [delegate thumbnailLoader:self didLoad:indexPath];
+        }
+    } else {
+        imageData = [[NSMutableData data] retain];
+        connection = [[NSURLConnection alloc] initWithRequest:[NSURLRequest requestWithURL:url] delegate:self];
+    }
 }
 
 - (void)connection:(NSURLConnection *)aConnection didReceiveData:(NSData *)data {
