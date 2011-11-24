@@ -1,7 +1,7 @@
 Async image loader.
+-------------------
 
-Using PTThumbnailLoader
-===================================
+### Using PTThumbnailLoader
 
 Add files into your project
 
