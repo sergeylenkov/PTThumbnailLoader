@@ -43,3 +43,34 @@ Load image into UITableView
 	- (void)thumbnailLoader:(PTThumbnailLoader *)loader didFail:(NSError *)error {
 	    [loader release];
 	}
+	
+Using blocks
+
+	- (UITableViewCell *)tableView:(UITableView *)aTableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+		UITableViewCell *cell = [aTableView dequeueReusableCellWithIdentifier:@"ID"];
+		if (cell == nil) cell = [self reuseTableViewCellWithIdentifier:@"ID"];
+	
+    	Gallery *gallery = [items objectAtIndex:indexPath.row];
+    	UIImageView *imageView = (UIImageView *)[cell.contentView viewWithTag:1];
+    
+   		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+       	NSString *cachePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"Thumbnails"];
+     	NSString *filePath = [cachePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%d.png", gallery.identifier]];
+        
+     	PTThumbnailLoader *loader = [[PTThumbnailLoader alloc] init];
+        loader.cacheFile = filePath;
+        
+        PTThumbnailLoaderResultBlock resultBlock = ^(UIImage *image) {
+            gallery.preview = image;
+            imageView.image = gallery.preview;
+        };
+        
+        PTThumbnailLoaderFailureBlock failureBlock = ^(NSError *error) {
+            NSLog(@"ERROR %@", [error localizedDescription]);
+        };
+        
+        [loader downloadImage:gallery.imageURL withResultBlock:resultBlock failureBlock:failureBlock];
+        [loader release];
+	
+		return cell;
+	}

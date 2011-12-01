@@ -16,6 +16,9 @@
 
 @end
 
+typedef void (^PTThumbnailLoaderResultBlock)(UIImage *image);
+typedef void (^PTThumbnailLoaderFailureBlock)(NSError *error);
+
 @interface PTThumbnailLoader : NSObject {
     NSURL *url;
     UIImage *image;
@@ -26,13 +29,16 @@
     NSURLConnection *connection;
 }
 
-
 @property (nonatomic, retain) NSURL *url;
 @property (nonatomic, retain) UIImage *image;
 @property (nonatomic, retain) NSIndexPath *indexPath;
 @property (nonatomic, copy) NSString *cacheFile;
 @property (nonatomic, assign) id <PTThumbnailLoaderDelegate> delegate;
+@property (nonatomic, copy) PTThumbnailLoaderResultBlock resultBlock;
+@property (nonatomic, copy) PTThumbnailLoaderFailureBlock failureBlock;
 
+- (void)downloadImage:(NSURL *)aUrl withResultBlock:(PTThumbnailLoaderResultBlock)aResultBlock failureBlock:(PTThumbnailLoaderFailureBlock)aFailureBlock;
 - (void)startDownload;
+- (void)didFinished;
 
 @end

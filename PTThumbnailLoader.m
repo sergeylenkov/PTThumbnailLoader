@@ -14,6 +14,8 @@
 @synthesize indexPath;
 @synthesize cacheFile;
 @synthesize delegate;
+@synthesize resultBlock;
+@synthesize failureBlock;
 
 - (void)dealloc {
     [url release];
@@ -22,16 +24,23 @@
     [cacheFile release];
     [imageData release];
     [connection release];
+    [resultBlock release];
+    [failureBlock release];
     [super dealloc];
+}
+
+- (void)downloadImage:(NSURL *)aUrl withResultBlock:(PTThumbnailLoaderResultBlock)aResultBlock failureBlock:(PTThumbnailLoaderFailureBlock)aFailureBlock {
+    self.url = aUrl;
+    self.resultBlock = aResultBlock;
+    self.failureBlock = aFailureBlock;
+
+    [self startDownload];
 }
 
 - (void)startDownload {
     if (cacheFile && [[NSFileManager defaultManager] fileExistsAtPath:cacheFile]) {
         self.image = [UIImage imageWithContentsOfFile:cacheFile];
-        
-        if (delegate) {
-            [delegate thumbnailLoader:self didLoad:indexPath];
-        }
+        [self didFinished];
     } else {
         imageData = [[NSMutableData data] retain];
         connection = [[NSURLConnection alloc] initWithRequest:[NSURLRequest requestWithURL:url] delegate:self];
@@ -46,6 +55,10 @@
     if (delegate) {
         [delegate thumbnailLoader:self didFail:error];
     }
+    
+    if (self.failureBlock) {
+        self.failureBlock(error);
+    }    
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)aConnection {
@@ -55,8 +68,16 @@
         [imageData writeToFile:cacheFile atomically:YES];
     }
     
+    [self didFinished];
+}
+
+- (void)didFinished {
     if (delegate) {
         [delegate thumbnailLoader:self didLoad:indexPath];
+    }
+    
+    if (self.resultBlock) {
+        self.resultBlock(image);
     }
 }
 
